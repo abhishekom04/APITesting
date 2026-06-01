@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="Suite">
+    <listeners>
+        <listener class-name="api.utilities.ExtentReport"></listener>
+    </listeners>
+
+    <test name="LoginTests">
+        <classes>
+            <class name="api.test.ResponseValidation"/>
+            <class name="api.test.RESTApiAuthentication"/>
+        </classes>
+    </test>
+
+    <!-- <test name="CheckoutTests">
+        <classes>
+            <class name="com.example.tests.CartTest"/>
+            <class name="com.example.tests.PaymentTest"/>
+        </classes>
+    </test> -->
+
+</suite>
