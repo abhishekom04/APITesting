@@ -5,7 +5,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ReadWriteExcelData {
 
@@ -57,32 +60,74 @@ public class ReadWriteExcelData {
     }
 
     @Test
-    public void writeDataToExcel() throws IOException {
+    public void writeDataToExcel1() throws IOException {
 
-        FileInputStream fis = new FileInputStream(filePath);
-        Workbook workbook = new XSSFWorkbook(fis);
-        Sheet sheet = workbook.getSheetAt(0);
+        File file = new File(filePath);
+        Workbook workbook=new XSSFWorkbook();  // If file does not exist, create new workbook and sheet
+        Sheet sheet= workbook.createSheet("Sheet1");;
 
-        String[] results = {"PASS", "FAIL", "PASS", "PASS"}; // test outcomes
+        // Example: write multiple test data
+        String[] results = {"PASS", "FAIL", "PASS", "PASS"};
 
         for (int i = 0; i < results.length; i++) {
-            Row row = sheet.getRow(i + 1); // skip header row
+            Row row = sheet.getRow(i);
             if (row == null) {
-                row = sheet.createRow(i + 1);
+                row = sheet.createRow(i);
             }
-            Cell cell = row.createCell(0); // write in 3rd column
+            Cell cell = row.createCell(0); // write in first column
             cell.setCellValue(results[i]);
         }
 
-        // Save changes
-        fis.close();
+        // Save changes (creates file if not present)
         FileOutputStream fos = new FileOutputStream(filePath);
         workbook.write(fos);
         fos.close();
         workbook.close();
 
-        System.out.println("Data written successfully!");
+        System.out.println("Test data written successfully!");
+    }
 
+    @Test
+    public void writeDataToExcel2() throws IOException {
+
+        File file = new File(filePath);
+        Workbook workbook;
+        Sheet sheet;
+
+        if (file.exists()) {
+            // If file exists, open it
+            FileInputStream fis = new FileInputStream(file);
+            workbook = new XSSFWorkbook(fis);
+            sheet = workbook.getSheet("Sheet1");
+            if (sheet == null) {
+                sheet = workbook.createSheet("Sheet1");
+            }
+            fis.close();
+        } else {
+            // If file does not exist, create new workbook and sheet
+            workbook = new XSSFWorkbook();
+            sheet = workbook.createSheet("Sheet1");
+        }
+
+        // Example: write multiple test data
+        String[] results = {"PASS", "FAIL", "PASS", "PASS"};
+
+        for (int i = 0; i < results.length; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                row = sheet.createRow(i);
+            }
+            Cell cell = row.createCell(0); // write in first column
+            cell.setCellValue(results[i]);
+        }
+
+        // Save changes (creates file if not present)
+        FileOutputStream fos = new FileOutputStream(filePath);
+        workbook.write(fos);
+        fos.close();
+        workbook.close();
+
+        System.out.println("Test data written successfully!");
     }
 
 }

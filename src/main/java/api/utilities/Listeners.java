@@ -1,6 +1,5 @@
 package api.utilities;
 
-import org.testng.ITestListener;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
