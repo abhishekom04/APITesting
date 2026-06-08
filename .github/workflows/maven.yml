@@ -1,4 +1,4 @@
-name: Selenium Tests
+name: API Tests
 
 on:
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
 
       # 8. Upload Extent Report as artifact
       - name: Upload Extent Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ExtentReport
           path: reports/*.html
