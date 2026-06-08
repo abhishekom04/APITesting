@@ -1,35 +1,66 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Java CI with Maven
+name: Selenium Tests
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # Future-proof Node.js
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
+      # 2. Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # 4. Build project (skip tests here)
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+
+      # 5. Run API tests (Surefire picks up testng.xml)
+      - name: Run Selenium Tests
+        run: mvn test
+
+      # 6. Upload Surefire reports
+      - name: Upload Surefire Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+
+      # 8. Upload Extent Report as artifact
+      - name: Upload Extent Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ExtentReport
+          path: reports/*.html
+
+      # 9. Publish summary in GitHub Actions UI
+      - name: Publish Test Summary
+        if: always()
+        run: |
+          echo "### 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          REPORT=target/surefire-reports/TEST-TestSuite.xml
+          if [ -f "$REPORT" ]; then
+            PASSED=$(grep -oP 'tests="\K[0-9]+' "$REPORT")
+            FAILURES=$(grep -oP 'failures="\K[0-9]+' "$REPORT")
+            ERRORS=$(grep -oP 'errors="\K[0-9]+' "$REPORT")
+            SKIPPED=$(grep -oP 'skipped="\K[0-9]+' "$REPORT")
+            ACTUAL_PASSED=$((PASSED - FAILURES - ERRORS - SKIPPED))
+            echo "- ✅ Passed: $ACTUAL_PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ Failures: $FAILURES" >> $GITHUB_STEP_SUMMARY
+            echo "- ⚠️ Errors: $ERRORS" >> $GITHUB_STEP_SUMMARY
+            echo "- ⏭️ Skipped: $SKIPPED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No Surefire report found." >> $GITHUB_STEP_SUMMARY
+          fi
