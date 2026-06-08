@@ -38,6 +38,9 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
+      - name: List reports folder
+        run: ls -R reports || echo "No reports folder found"
+
       - name: Find Extent Report
         id: find_report
         run: |
