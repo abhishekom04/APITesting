@@ -9,6 +9,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,8 +25,9 @@ public class ExtentReport implements ITestListener {
 
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss").format(new Date());
         repName="Test-Result_"+timeStamp+".html";
-
-        extentSparkReporter = new ExtentSparkReporter(".\\reports\\" + repName);
+        //new File("reports").mkdirs();
+        new File(System.getProperty("user.dir")+File.separator+"reports").mkdirs();
+        extentSparkReporter = new ExtentSparkReporter(System.getProperty("user.dir")+File.separator+"reports"+File.separator + repName);
         extentSparkReporter.config().setDocumentTitle("API Test Report");
         extentSparkReporter.config().setReportName("Petstore User API");
         extentSparkReporter.config().setTheme(Theme.DARK);
