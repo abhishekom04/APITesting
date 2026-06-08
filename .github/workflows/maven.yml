@@ -38,6 +38,18 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
 
+      - name: Find Extent Report
+        id: find_report
+        run: |
+          REPORT_FILE=$(ls reports/Test-Result_*.html | head -n 1)
+          echo "report_file=$REPORT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Upload Extent Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExtentReport
+          path: ${{ steps.find_report.outputs.report_file }}
+
       # 6. Upload Extent Report as artifact
       - name: Upload Extent Report
         uses: actions/upload-artifact@v4
