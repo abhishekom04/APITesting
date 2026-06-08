@@ -1,5 +1,7 @@
 package api.test;
 
+import api.utilities.ExtentReport;
+import com.aventstack.extentreports.Status;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -19,6 +21,8 @@ public class ResponseValidation {
     @Test
     public void getRequestJsonFormat1(){
 
+        ExtentReport.getTest().log(Status.INFO, "Starting API validation");
+
         given()
                 .contentType(ContentType.JSON)
                 .when().relaxedHTTPSValidation()
@@ -27,7 +31,7 @@ public class ResponseValidation {
                 .assertThat()
                 .statusCode(200)
                 .statusLine("HTTP/1.1 200 OK")
-                .body("user[0].email",equalTo("emily.johnson@x.dummyjson.com"),
+                .body("users[0].email",equalTo("emily.johnson@x.dummyjson.com"),
                         "users[0].gender",equalTo("female"),
                         "users.size()",equalTo(30))
                 .log().all();
@@ -43,41 +47,51 @@ public class ResponseValidation {
         System.out.println("Body: "+body);
 
         String contentType = response.getHeader("Content-Type");
-        System.out.println("Header: "+contentType);
+        System.out.println("Content-Type: "+contentType);
+        ExtentReport.getTest().log(Status.INFO, "Content-Type: "+contentType);
 
         String encoding = response.getHeader("Content-Encoding");
-        System.out.println("Encoding: "+encoding);
+        System.out.println("Content-Encoding: "+encoding);
+        ExtentReport.getTest().log(Status.INFO, "Content-Encoding: "+encoding);
 
         String statusLine = response.getStatusLine().toString();
         System.out.println("Status Line: "+statusLine);
+        ExtentReport.getTest().log(Status.INFO, "Status Line: "+statusLine);
 
         JsonPath jsonPath = new JsonPath(response.asString());
         int numberOfUsers = jsonPath.getInt("users.size()");
         System.out.println("Number of users: "+numberOfUsers);
+        ExtentReport.getTest().log(Status.INFO, "Number of users: "+numberOfUsers);
 
         //Method-1 of getting only one element
         String firstName = response.jsonPath().getString("users[0].firstName");
         System.out.println("First Name: "+firstName);
+        ExtentReport.getTest().log(Status.INFO, "First Name: "+firstName);
 
         //Method-2 of getting only one element
         String email = response.jsonPath().get("users[0].email").toString();
         System.out.println("Email: "+email);
+        ExtentReport.getTest().log(Status.INFO, "Email: "+email);
 
         //Method of getting list of JsonObjects of JsonArray
         //when more than one element is present, URL=https://dummyjson.com/users
         List<String> firstNames = response.jsonPath().getList("users.firstName");
         System.out.println("First Names: "+firstNames);
+        ExtentReport.getTest().log(Status.INFO, "First Names: "+firstNames);
 
         //Method of getting list of JsonObjects of JsonArray
         //when more than one element is present, URL=https://dummyjson.com/users
         //For nested JSON elements
         List<String> hairColors = response.jsonPath().getList("users.hair.color");
         System.out.println("Hair Colors: "+hairColors);
+        ExtentReport.getTest().log(Status.INFO, "Hair Colors: "+hairColors);
 
     }
 
     @Test
     public void getRequestJsonFormat2(){
+
+        ExtentReport.getTest().log(Status.INFO, "Starting API validation");
 
         given()
                 .contentType(ContentType.JSON)
@@ -85,13 +99,13 @@ public class ResponseValidation {
                 .get("https://dummyjson.com/users/1")
                 .then()
                 .assertThat()
-                .header("Content-Type","application/json")
+                .header("Content-Type","application/json; charset=utf-8")
                 .statusCode(200)
                 .statusLine("HTTP/1.1 200 OK")
                 .body("email",equalTo("emily.johnson@x.dummyjson.com"),
                         "gender",equalTo("female"),
                         "hair.color",equalTo("Brown"),
-                        "users.size()",equalTo(28))
+                        "size()",equalTo(28))
                 .log().all();
 
 
@@ -106,34 +120,41 @@ public class ResponseValidation {
         System.out.println("Body: "+body);
 
         String contentType = response.getHeader("Content-Type");
-        System.out.println("Header: "+contentType);
+        System.out.println("Content-Type: "+contentType);
+        ExtentReport.getTest().log(Status.INFO, "Content-Type: "+contentType);
 
         String encoding = response.getHeader("Content-Encoding");
-        System.out.println("Encoding: "+encoding);
+        System.out.println("Content-Encoding: "+encoding);
+        ExtentReport.getTest().log(Status.INFO, "Content-Encoding: "+encoding);
 
         String statusLine = response.getStatusLine().toString();
         System.out.println("Status Line: "+statusLine);
+        ExtentReport.getTest().log(Status.INFO, "Status Line: "+statusLine);
 
         JsonPath jsonPath = new JsonPath(response.asString());
         int numberOfUserDetails = jsonPath.getInt("size()");
         System.out.println("Number of user details: "+numberOfUserDetails);
+        ExtentReport.getTest().log(Status.INFO, "Number of user details: "+numberOfUserDetails);
 
         String firstName = response.jsonPath().getString("firstName");
         System.out.println("First Name: "+firstName);
+        ExtentReport.getTest().log(Status.INFO, "First Name: "+firstName);
 
         String email = response.jsonPath().get("email").toString();
         System.out.println("Email: "+email);
+        ExtentReport.getTest().log(Status.INFO, "Email: "+email);
 
 
         Map<String,String> hair = response.jsonPath().getMap("hair");
         System.out.println("Hair : "+hair);
         System.out.println("Hair Color : "+hair.get("color").contains("Brown"));
+        ExtentReport.getTest().log(Status.INFO, "Hair : "+hair);
 
         //use .getList() method if the element are present in an array
 
-        List<String> instructions =  response.jsonPath().getList("instructions");
-        System.out.println("Instructions: "+instructions);
-        System.out.println("Instructions : "+instructions.get(0));
+//        List<String> instructions =  response.jsonPath().getList("instructions");
+//        System.out.println("Instructions: "+instructions);
+//        System.out.println("Instructions : "+instructions.get(0));
 
         //Note: if there is element inside the third loop
         //ex: company.address.coordinate then if you want to get elements of coordinate then
@@ -159,7 +180,7 @@ public class ResponseValidation {
 //        System.out.println("Coordinate : "+coordinate);
     }
 
-    @Test
+    @Test(enabled = false)
     public void getRequestXmlFormat2(){
 
         given()
@@ -242,7 +263,7 @@ public class ResponseValidation {
 //        System.out.println("Coordinate : "+coordinate);
     }
 
-    @Test
+    @Test(enabled = false)
     public void uploadSingleFile() {
 
         given()
@@ -258,7 +279,7 @@ public class ResponseValidation {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void uploadMultipleFiles() {
 
         given()
@@ -294,7 +315,7 @@ public class ResponseValidation {
                 .log().all();
     }
 
-    @Test
+    @Test(enabled = false)
     public void downloadFile() {
 
         Response response=

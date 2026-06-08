@@ -18,6 +18,7 @@ public class ExtentReport implements ITestListener {
     public ExtentReports extents;  //projecting common data like environment data, user data, project name, module name
     public ExtentTest test;  //used for creating entries to the report i.e if the test fails entering that data
     String repName;
+    private static ThreadLocal<ExtentTest> testInfo = new ThreadLocal<>();
 
     public void onStart(ITestContext context) {
 
@@ -41,33 +42,54 @@ public class ExtentReport implements ITestListener {
 
     }
 
+    public void onTestStart(ITestResult result) {
+
+        // when you are logging the test info to the extent report, do the following to log the info
+        System.out.println("ExtentTest created for: " + result.getMethod().getMethodName());
+        ExtentTest extentTest = extents.createTest(result.getMethod().getMethodName());
+        testInfo.set(extentTest);
+    }
+
     public void onTestSuccess(ITestResult result) {
 
-        test = extents.createTest(result.getName());
-        test.assignCategory(result.getMethod().getGroups());
-        test.assignCategory(result.getMethod().getMethodName());
-        test.createNode(result.getName());
-        test.log(Status.PASS, "Test Passed");
+//        test = extents.createTest(result.getName());
+//        test.assignCategory(result.getMethod().getGroups());
+//        test.assignCategory(result.getMethod().getMethodName());
+//        test.createNode(result.getName());
+//        test.log(Status.PASS, "Test Passed");
+
+        //OR, when you are logging the test info to the extent report
+        testInfo.get().log(Status.PASS, "Test Passed");
     }
 
     public void onTestFailure(ITestResult result) {
 
-        test = extents.createTest(result.getName());
-        test.assignCategory(result.getMethod().getGroups());
-        test.assignCategory(result.getMethod().getMethodName());
-        test.createNode(result.getName());
-        test.log(Status.FAIL, "Test Failed");
-        test.log(Status.FAIL, result.getThrowable().getMessage());
+//        test = extents.createTest(result.getName());
+//        test.assignCategory(result.getMethod().getGroups());
+//        test.assignCategory(result.getMethod().getMethodName());
+//        test.createNode(result.getName());
+//        test.log(Status.FAIL, "Test Failed");
+//        test.log(Status.FAIL, result.getThrowable().getMessage());
+
+        //OR, when you are logging the test info to the extent report
+        testInfo.get().log(Status.FAIL, "Test Failed");
+        testInfo.get().log(Status.FAIL, result.getThrowable());
     }
 
     public void onTestSkipped(ITestResult result) {
 
-        test = extents.createTest(result.getName());
-        test.assignCategory(result.getMethod().getGroups());
-        test.assignCategory(result.getMethod().getMethodName());
-        test.createNode(result.getName());
-        test.log(Status.SKIP, "Test Skipped");
-        test.log(Status.SKIP, result.getThrowable().getMessage());
+//        test = extents.createTest(result.getName());
+//        test.assignCategory(result.getMethod().getGroups());
+//        test.assignCategory(result.getMethod().getMethodName());
+//        test.createNode(result.getName());
+//        test.log(Status.SKIP, "Test Skipped");
+//        test.log(Status.SKIP, result.getThrowable().getMessage());
+
+        //OR, when you are logging the test info to the extent report
+        testInfo.get().log(Status.SKIP, "Test Skipped");
+        if (result.getThrowable() != null) {
+            testInfo.get().log(Status.SKIP, result.getThrowable());
+        }
     }
 
     public void onFinish(ITestContext context) {
@@ -77,7 +99,11 @@ public class ExtentReport implements ITestListener {
         extents.flush();
     }
 
-    public void onTestStart(ITestResult result) {}
+    // Getter so test classes can log custom steps
+    public static ExtentTest getTest() {
+        return testInfo.get();
+    }
+
 
     public void onTestFailedButWithinTestResult(ITestResult result) {}
 
